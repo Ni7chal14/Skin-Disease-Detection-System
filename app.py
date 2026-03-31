@@ -1,12 +1,32 @@
 import streamlit as st
 import numpy as np
 import cv2
-from tensorflow.keras.models import load_model
+import gdown
+import os
+import tensorflow as tf
 
-# Load model
-model = load_model("skin_disease_model.h5")
+# ==============================
+# MODEL CONFIG
+# ==============================
+MODEL_PATH = "skin_disease_model.h5"
+MODEL_URL = "https://drive.google.com/uc?export=download&id=1zGC3VGWtFMqXr66gDWlXACWnQZtut5Q8"
 
-# Class labels (VERY IMPORTANT)
+# ==============================
+# DOWNLOAD + LOAD MODEL
+# ==============================
+@st.cache_resource
+def load_my_model():
+    if not os.path.exists(MODEL_PATH):
+        with st.spinner("Downloading model... ⏳"):
+            gdown.download(MODEL_URL, MODEL_PATH, quiet=False)
+    
+    return tf.keras.models.load_model(MODEL_PATH, compile=False)
+
+model = load_my_model()
+
+# ==============================
+# CLASS LABELS
+# ==============================
 class_names = {
     0: "Actinic Keratoses",
     1: "Basal Cell Carcinoma",
@@ -17,11 +37,12 @@ class_names = {
     6: "Vascular Lesion"
 }
 
+# ==============================
+# UI
+# ==============================
 st.title("🧠 Skin Disease Detection System")
-
 st.write("Upload an image to detect skin disease")
 
-# Upload image
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png", "jpeg"])
 
 if uploaded_file is not None:
@@ -38,8 +59,10 @@ if uploaded_file is not None:
     img_resized = img_resized / 255.0
     img_resized = np.expand_dims(img_resized, axis=0)
 
-   # Prediction
-    prediction = model.predict(img_resized)
+    # Prediction
+    with st.spinner("Analyzing image..."):
+        prediction = model.predict(img_resized)
+
     probs = prediction[0]
 
     # Get class + confidence
@@ -62,7 +85,7 @@ if uploaded_file is not None:
     st.subheader("Confidence:")
     st.write(f"{confidence:.2f}")
 
-   # Probabilities
+    # Probabilities
     st.subheader("Prediction Probabilities:")
     for i, prob in enumerate(probs):
         st.write(f"{class_names[i]}: {prob:.4f}")
