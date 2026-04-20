@@ -38,7 +38,7 @@ def load_skin_model():
         url = "https://drive.google.com/uc?id=1zGC3VGWtFMqXr66gDWlXACWnQZtut5Q8"
         gdown.download(url, MODEL_PATH, quiet=False)
 
-    return load_model(MODEL_PATH)
+    return load_model(MODEL_PATH, compile=False)
 
 model = load_skin_model()
 
