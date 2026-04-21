@@ -1,6 +1,7 @@
 streamlit
-numpy
+numpy<2.0
 opencv-python-headless
 pillow
 tensorflow==2.20.0
+keras>=3.0.0
 gdown
